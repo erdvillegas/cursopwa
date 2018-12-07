@@ -16,6 +16,13 @@
  Imprima en consola el nombre y género de la persona.
 */
 
+fetch('https://swapi.co/api/people/1/')
+    .then( resp => resp.json())
+    .then(persona => {
+        console.log(persona.name);
+        console.log(persona.gender);
+    });
+
 // Resolución de la tarea #1
 
 // fetch( 'https://swapi.co/api/people/1/' )
@@ -47,14 +54,14 @@
 */
 
 // Resolución de la tarea #2
-function postData( persona ) {
+function postData(persona) {
 
     let data = {
         nombre: persona.name,
         genero: persona.gender
     };
 
-    return fetch( 'https://reqres.in/api/users', {
+    return fetch('https://reqres.in/api/users', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -66,12 +73,8 @@ function postData( persona ) {
 
 
 
-fetch( 'https://swapi.co/api/people/1/' )
-    .then( resp => resp.json() )
-    .then( postData )
-    .then( resp => resp.json() )
-    .then( console.log );
-
-
-
-
+fetch('https://swapi.co/api/people/12/')
+    .then(resp => resp.json())
+    .then(postData)
+    .then(resp => resp.json())
+    .then(console.log);
