@@ -1,17 +1,33 @@
 /**
  * Cache para contenido estatico y el core de la aplicacion
  */
-const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_STATIC_NAME = "static-v2";
 
 /**
  * Cache para contenido dinamico
  */
-const CACHE_DYNAMIC_NAME = 'dynamic-v1';
+const CACHE_DYNAMIC_NAME = "dynamic-v1";
 
 /**
  * Cache para contenido que no debe cambiar
  */
-const CACHE_INMUTABLE_NAME = 'inmutable-v1';
+const CACHE_INMUTABLE_NAME = "inmutable-v1";
+
+/**
+ * Limpia os objetos de memoria cache
+ * @param {*} cacheName Nombre de la cache a limpiar
+ * @param {*} numeroItems Total de elementos a eliminar
+ */
+function limpiarCache(cacheName, numeroItems) {
+    caches.open(cacheName).then(cache => {
+        return cache.keys()
+            .then(keys => {
+                if (keys.length >= numeroItems) {
+                    cache.delete(keys[0]).then(limpiarCache(cacheName, numeroItems));
+                }
+            });
+    });
+}
 
 //Guardamos los datos en la instalación
 self.addEventListener("install", e => {
@@ -25,13 +41,13 @@ self.addEventListener("install", e => {
         ]);
     });
 
-    const cacheInmutable = caches.open(CACHE_INMUTABLE_NAME).then(cache=>{
+    const cacheInmutable = caches.open(CACHE_INMUTABLE_NAME).then(cache => {
         return cache.addAll([
             "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
         ]);
     });
 
-    e.waitUntil(Promise.all([cachePromInstall,cacheInmutable]));
+    e.waitUntil(Promise.all([cachePromInstall, cacheInmutable]));
 });
 
 //Estrategias de cache
@@ -46,8 +62,8 @@ self.addEventListener("fetch", e => {
     //e.respondWith( caches.match( e.request ) );
 
     /*
-     * 2- Cache con Network Fallback
-     *    Descargo la respuesta desde internet si el archivo 
+     * 2- Cache con Network Fallback (Ṕrimero cache, luego internet)
+     *    Descargo la respuesta desde internet si el archivo
      *    no se encuentra, después lo almacena en cache
      */
 
@@ -58,10 +74,10 @@ self.addEventListener("fetch", e => {
         console.log("No existe ", e.request.url);
 
         return fetch(e.request).then(newResponse => {
-            caches.open(CACHE_DYNAMIC_NAME)
-                .then(cache => {
-                    cache.put(e.request,newResponse);
-                });
+            caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+                cache.put(e.request, newResponse);
+                limpiarCache(CACHE_DYNAMIC_NAME, 5);
+            });
 
             return newResponse.clone();
         });
