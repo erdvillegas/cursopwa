@@ -14,6 +14,11 @@ const CACHE_DYNAMIC_NAME = "dynamic-v1";
 const CACHE_INMUTABLE_NAME = "inmutable-v1";
 
 /**
+ * Tamaño máximo de objetos almacenados en cache
+ */
+const CACHE_DYNAMIC_LIMIT = 50;
+
+/**
  * Limpia os objetos de memoria cache
  * @param {*} cacheName Nombre de la cache a limpiar
  * @param {*} numeroItems Total de elementos a eliminar
@@ -67,20 +72,41 @@ self.addEventListener("fetch", e => {
      *    no se encuentra, después lo almacena en cache
      */
 
-    const respuestaCache = caches.match(e.request).then(resp => {
-        if (resp) return resp;
+    // const respuestaCache = caches.match(e.request).then(resp => {
+    //     if (resp) return resp;
 
-        //NO existe el archivio, lo descargo de la web
-        console.log("No existe ", e.request.url);
+    //     //NO existe el archivio, lo descargo de la web
+    //     console.log("No existe ", e.request.url);
 
-        return fetch(e.request).then(newResponse => {
-            caches.open(CACHE_DYNAMIC_NAME).then(cache => {
-                cache.put(e.request, newResponse);
-                limpiarCache(CACHE_DYNAMIC_NAME, 5);
+    //     return fetch(e.request).then(newResponse => {
+    //         caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+    //             cache.put(e.request, newResponse);
+    //             limpiarCache(CACHE_DYNAMIC_NAME, 5);
+    //         });
+
+    //         return newResponse.clone();
+    //     });
+    // });
+
+    /**
+     * 3.- Network with cache Fallback
+     *     Primero va internet e intenta obtener el recurso, 
+     *     si no lo encuentra lo trata de obtener de la cache
+     */
+
+    const respuestaCache = fetch(e.request).then(res => {
+
+        if (!res) return caches.match(e.request);
+
+        caches.open(CACHE_DYNAMIC_NAME)
+            .then(cache => {
+                cache.put(e.request, res);
+                limpiarCache(CACHE_DYNAMIC_NAME, CACHE_DYNAMIC_LIMIT);
             });
 
-            return newResponse.clone();
-        });
+        return res.clone();
+    }).catch(err => {
+        return caches.match(e.request);
     });
 
     e.respondWith(respuestaCache);
