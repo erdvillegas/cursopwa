@@ -25,12 +25,11 @@ const CACHE_DYNAMIC_LIMIT = 50;
  */
 function limpiarCache(cacheName, numeroItems) {
     caches.open(cacheName).then(cache => {
-        return cache.keys()
-            .then(keys => {
-                if (keys.length >= numeroItems) {
-                    cache.delete(keys[0]).then(limpiarCache(cacheName, numeroItems));
-                }
-            });
+        return cache.keys().then(keys => {
+            if (keys.length >= numeroItems) {
+                cache.delete(keys[0]).then(limpiarCache(cacheName, numeroItems));
+            }
+        });
     });
 }
 
@@ -90,23 +89,41 @@ self.addEventListener("fetch", e => {
 
     /**
      * 3.- Network with cache Fallback
-     *     Primero va internet e intenta obtener el recurso, 
+     *     Primero va internet e intenta obtener el recurso,
      *     si no lo encuentra lo trata de obtener de la cache
      */
 
-    const respuestaCache = fetch(e.request).then(res => {
+    //   const respuestaCache = fetch(e.request)
+    //     .then(res => {
+    //       if (!res) return caches.match(e.request);
 
-        if (!res) return caches.match(e.request);
+    //       caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+    //         cache.put(e.request, res);
+    //         limpiarCache(CACHE_DYNAMIC_NAME, CACHE_DYNAMIC_LIMIT);
+    //       });
 
-        caches.open(CACHE_DYNAMIC_NAME)
-            .then(cache => {
-                cache.put(e.request, res);
-                limpiarCache(CACHE_DYNAMIC_NAME, CACHE_DYNAMIC_LIMIT);
-            });
+    //       return res.clone();
+    //     })
+    //     .catch(err => {
+    //       return caches.match(e.request);
+    //     });
 
-        return res.clone();
-    }).catch(err => {
-        return caches.match(e.request);
+    /**
+     *  4.- Cache with Network update
+     *      Util cuando el rendimiento es crítico, para que el usuario sienta
+     *      que está trabajando en una aplicación nativa.
+     *      Las actualizaciones siempre estaran un paso atras de la version actual
+     */
+
+    if (e.request.url.includes("bootstrap")) {
+        return e.respondWith(caches.match(e.request));
+    }
+    const respuestaCache = caches.open(CACHE_STATIC_NAME).then(cache => {
+        fetch(e.request).then(newRes => {
+            cache.put(e.request, newRes);
+        });
+
+        return cache.match(e.request);
     });
 
     e.respondWith(respuestaCache);
