@@ -141,7 +141,7 @@ self.addEventListener("fetch", e => {
                 if (/\.(png|jpg)$/i.test(e.request.url)) {
                     resolve(caches.match('/img/no-img.jpg'));
                 } else {
-                    reject('No se encontro respuesta');
+                    reject('No se encontro respue6326sta');
                 }
             } else {
                 rechazado = true;
