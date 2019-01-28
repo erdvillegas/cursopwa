@@ -71,6 +71,8 @@
     "globals"       : {
         "$"     : true,
         "self"  : true,
-        "caches": true
+        "caches": true,
+        "importScripts" : true,
+        "actualizaCacheDinamico" : true
     }
 }
