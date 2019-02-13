@@ -29,17 +29,10 @@ for (i; i <= 25; i++) {
 
 
 // 2- Insertar en la base de datos
-// function insterarDatos(mensaje){
-//     if(mensaje.texto.length <= 0) return;
-//     db.put(mensaje)
-//     .then(console.log("Insertado")
-//     .catch(console.log("Algo paso al insertar el dato"))
-//     );
-// }
 dbMsj.forEach(mensaje => {
     db.put(mensaje)
         .then(console.log("Insertado"))
-        .catch(console.log("Algo paso al insertar el dato"));
+        .catch(e=>{console.log("Algo paso al insertar el dato",e);});
 });
 
 
@@ -70,10 +63,11 @@ db.allDocs({ include_docs: true, descending: false })
 // deberá de comentar todo el código que actualiza
 // el campo de la sincronización 
 db.allDocs({ include_docs: true, descending: false })
-    .then(doc => {
-        doc.rows.map(elemento => {
-            if (elemento.doc.sincronizado) {
-                db.remove(doc).then(console.log("Registro eliminado"));
+    .then(docs => {
+        docs.rows.forEach(row => {
+            let doc = row.doc;
+            if (doc.sincronizado) {
+                db.remove(doc);
             }
         });
     });
