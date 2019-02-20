@@ -4,8 +4,16 @@ function manejoApiMensajes(cacheName, req) {
     if (req.clone().method === 'POST') {
         //Posteo de un nuevo mensaje
 
-        //Tengo que guardar en IndexDB
-        return fetch(req);
+        if (self.registration.sync) {
+            return req.clone().text().then(body => {
+
+                const bodyObj = JSON.parse(body);
+                return guardarMensaje(bodyObj);
+            });
+        } else {
+            //Tengo que guardar en IndexDB
+            return fetch(req);
+        }
     } else {
 
 
