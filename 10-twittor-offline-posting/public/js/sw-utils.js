@@ -1,4 +1,10 @@
 // Network with cache fallback /update
+
+/**
+ * Manejo de mensajes en la API
+ * @param {*} cacheName Nombre de la cache
+ * @param {*} req Petición
+ */
 function manejoApiMensajes(cacheName, req) {
 
     if (req.clone().method === 'POST') {

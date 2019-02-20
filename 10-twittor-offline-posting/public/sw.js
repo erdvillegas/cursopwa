@@ -74,8 +74,6 @@ self.addEventListener('activate', e => {
 
 
 
-
-
 self.addEventListener('fetch', e => {
 
     let respuesta;
@@ -103,8 +101,6 @@ self.addEventListener('fetch', e => {
         });
     }
 
-
-
     e.respondWith(respuesta);
 
 });
@@ -112,14 +108,12 @@ self.addEventListener('fetch', e => {
 // Tareas asincronas
 
 self.addEventListener('sync', e => {
-
-    console.log('SW: Sync', e);
-
     if (e.tag === 'nuevo-post') {
 
         //Postear a BD cuando haya conexión
 
-        //e.waitUntil()
+        postearMensajes();
+        e.waitUntil('? ? ?');
     }
 
 });
