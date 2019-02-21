@@ -20,7 +20,6 @@ function guardarMensaje(mensaje) {
 
 
         const newResponse = { ok: true, offline: true };
-        console.log("Mensaje guardado para posterior posteo");
 
         return new Response(JSON.stringify(newResponse));
     });
@@ -39,7 +38,7 @@ function postearMensajes() {
         docs.rows.forEach(row => {
             const doc = row.doc;
 
-            const fetchPromesa = fetch('/api', {
+            const fetchPromesa = fetch('api', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -51,7 +50,6 @@ function postearMensajes() {
                     //En este punto dado que ya se posteo el dato, 
                     //se debe borrar de la base de datos temporal
                     return db.remove(doc);
-
                 });
 
             posteos.push(fetchPromesa);

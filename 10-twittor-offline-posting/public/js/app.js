@@ -1,4 +1,3 @@
-
 var url = window.location.href;
 var swLocation = '/twittor/sw.js';
 
@@ -90,7 +89,7 @@ function logIn(ingreso) {
 
 
 // Seleccion de personaje
-avatarBtns.on('click', function () {
+avatarBtns.on('click', function() {
 
     usuario = $(this).data('user');
 
@@ -101,14 +100,14 @@ avatarBtns.on('click', function () {
 });
 
 // Boton de salir
-salirBtn.on('click', function () {
+salirBtn.on('click', function() {
 
     logIn(false);
 
 });
 
 // Boton de nuevo mensaje
-nuevoBtn.on('click', function () {
+nuevoBtn.on('click', function() {
 
     modal.removeClass('oculto');
     modal.animate({
@@ -119,12 +118,12 @@ nuevoBtn.on('click', function () {
 });
 
 // Boton de cancelar mensaje
-cancelarBtn.on('click', function () {
+cancelarBtn.on('click', function() {
     if (!modal.hasClass('oculto')) {
         modal.animate({
             marginTop: '+=1000px',
             opacity: 0
-        }, 200, function () {
+        }, 200, function() {
             modal.addClass('oculto');
             txtMensaje.val('');
         });
@@ -132,7 +131,7 @@ cancelarBtn.on('click', function () {
 });
 
 // Boton de enviar mensaje
-postBtn.on('click', function () {
+postBtn.on('click', function() {
 
     var mensaje = txtMensaje.val();
     if (mensaje.length === 0) {
@@ -145,13 +144,13 @@ postBtn.on('click', function () {
         user: usuario
     };
 
-    fetch('/api', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
+    fetch('api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
         .then(res => res.json())
         .then(res => console.log('app.js', res))
         .catch(err => console.log('app.js', err));

@@ -108,12 +108,12 @@ self.addEventListener('fetch', e => {
 // Tareas asincronas
 
 self.addEventListener('sync', e => {
+
     if (e.tag === 'nuevo-post') {
 
-        //Postear a BD cuando haya conexión
-
-        postearMensajes();
-        e.waitUntil('? ? ?');
+        const respuesta = postearMensajes();
+        console.log(e);
+        e.waitUntil(respuesta);
     }
 
 });
