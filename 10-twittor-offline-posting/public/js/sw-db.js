@@ -17,8 +17,6 @@ function guardarMensaje(mensaje) {
     mensaje._id = new Date().toISOString();
     return db.put(mensaje).then(() => {
         self.registration.sync.register('nuevo-post');
-
-
         const newResponse = { ok: true, offline: true };
 
         return new Response(JSON.stringify(newResponse));

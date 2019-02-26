@@ -22,7 +22,6 @@ function manejoApiMensajes(cacheName, req) {
         }
     } else {
 
-
         return fetch(req)
             .then(res => {
                 if (res.ok) {

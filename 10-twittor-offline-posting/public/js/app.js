@@ -172,3 +172,32 @@ function getMensajes() {
 }
 
 getMensajes();
+
+//Detectar cambios de conexión
+
+/**
+ * Detecta si hay o no conexión en la red
+ */
+function isOnline() {
+    if (navigator.onLine) {
+        //Tenemos conexión
+        //console.log('OnLine');
+        mdtoast('Online', {
+            interaction: true,
+            interactionTimeout: 1000,
+            actionText: 'Ok!'
+        });
+    } else {
+        //No tenemos conexión
+        //console.log('OffLine');
+        mdtoast('Offline', {
+            interaction: true,
+            actionText: 'Ok!',
+            type: 'warning'
+        });
+    }
+}
+
+window.addEventListener('online', isOnline);
+window.addEventListener('offline', isOnline);
+isOnline();
