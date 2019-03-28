@@ -1,6 +1,11 @@
 var url = window.location.href;
 var swLocation = '/twittor/sw.js';
 
+/**
+ * Registro del servicesWorker utilizado para revisar si ya se ha suscrito o no
+ */
+var swReg;
+
 
 if (navigator.serviceWorker) {
 
@@ -9,8 +14,12 @@ if (navigator.serviceWorker) {
         swLocation = '/sw.js';
     }
 
-
-    navigator.serviceWorker.register(swLocation);
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register(swLocation).then(function(req) {
+            swReg = req;
+            swReg.pushManager.getSubscription().then(verificaSuscripcion);
+        });
+    });
 }
 
 
@@ -224,6 +233,7 @@ isOnline();
  * Verifica si se han activado las notificaciones
  */
 function verificaSuscripcion(activadas) {
+    console.log(activadas);
     if (activadas) {
         btnActivadas.removeClass('oculto');
         btnDesactivadas.addClass('oculto');
@@ -248,10 +258,7 @@ function enviarNotificacion() {
     notificacion.onclick = () => {
         console.log('Click');
     };
-
 }
-
-verificaSuscripcion(undefined);
 
 /**
  * Genera notificaciones
@@ -275,3 +282,37 @@ function notificarme() {
 }
 
 //notificarme();
+
+/**
+ * Obtengo la llave publica desde el servidor
+ */
+function getPublicKey() {
+
+    return fetch('api/key')
+        .then(res => res.arrayBuffer())
+        .then(key => new Uint8Array(key));
+}
+
+// Registra manualmente al SW mediante el botón
+btnDesactivadas.on('click', function() {
+    if (!swReg) return console.log("No hay registro de SW");
+
+    getPublicKey().then(function(key) {
+        swReg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: key
+            })
+            .then(res => res.toJSON())
+            .then(suscripcion => {
+
+                //Posteamos la suscripcion
+                fetch('api/suscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(suscripcion)
+                    })
+                    .then(verificaSuscripcion)
+                    .catch(console.log);
+            });
+    });
+});

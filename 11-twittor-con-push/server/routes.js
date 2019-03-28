@@ -43,6 +43,9 @@ router.post('/', function(req, res) {
 
 // Almacena la suscripcion del cliente
 router.post('/suscribe', (req, res) => {
+    const suscripcion = req.body;
+    push.addSubscription(suscripcion);
+
     res.json('suscribe');
 });
 
@@ -50,8 +53,7 @@ router.post('/suscribe', (req, res) => {
 router.get('/key', (req, res) => {
 
     const key = push.getKey();
-
-    res.json(key);
+    res.send(key);
 });
 
 // Envia una notificacion PUSH a las personas
