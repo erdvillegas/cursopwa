@@ -233,7 +233,7 @@ isOnline();
  * Verifica si se han activado las notificaciones
  */
 function verificaSuscripcion(activadas) {
-    console.log(activadas);
+    console.log("VerificaSuscripcion:", activadas);
     if (activadas) {
         btnActivadas.removeClass('oculto');
         btnDesactivadas.addClass('oculto');
