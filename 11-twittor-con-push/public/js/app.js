@@ -57,13 +57,13 @@ function crearMensajeHTML(mensaje, personaje) {
     var content = `
     <li class="animated fadeIn fast">
         <div class="avatar">
-            <img src="img/avatars/${ personaje }.jpg">
+            <img src="img/avatars/${ personaje}.jpg">
         </div>
         <div class="bubble-container">
             <div class="bubble">
-                <h3>@${ personaje }</h3>
+                <h3>@${ personaje}</h3>
                 <br/>
-                ${ mensaje }
+                ${ mensaje}
             </div>
             
             <div class="arrow"></div>
@@ -233,7 +233,6 @@ isOnline();
  * Verifica si se han activado las notificaciones
  */
 function verificaSuscripcion(activadas) {
-    console.log("VerificaSuscripcion:", activadas);
     if (activadas) {
         btnActivadas.removeClass('oculto');
         btnDesactivadas.addClass('oculto');
@@ -315,4 +314,18 @@ btnDesactivadas.on('click', function() {
                     .catch(console.log);
             });
     });
+});
+
+/**
+ * Cancela la suscripcion actual a las notificaciones push
+ */
+function cancelarSuscripcin() {
+
+    swReg.pushManager.getSubscription().then(subs => {
+        subs.unsubscribe().then(() => { verificaSuscripcion(false); });
+    });
+}
+
+btnActivadas.on("click", function() {
+    cancelarSuscripcin();
 });
