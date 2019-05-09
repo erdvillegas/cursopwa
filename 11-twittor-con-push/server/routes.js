@@ -59,7 +59,15 @@ router.get('/key', (req, res) => {
 // Envia una notificacion PUSH a las personas
 // Esto es solo para el BackEnd
 router.post('/push', (req, res) => {
-    res.json('key publico');
+
+    const post = {
+        titulo: req.body.titulo,
+        cuerpo: req.body.cuerpo,
+        usuario: req.body.usuario
+    };
+
+    push.sendPush(post);
+    res.json(post);
 });
 
 module.exports = router;
