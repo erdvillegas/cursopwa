@@ -1,5 +1,5 @@
 // imports
-importScripts('https://cdn.jsdelivr.net/npm/pouchdb@7.0.0/dist/pouchdb.min.js')
+importScripts('https://cdn.jsdelivr.net/npm/pouchdb@7.0.0/dist/pouchdb.min.js');
 
 importScripts('js/sw-db.js');
 importScripts('js/sw-utils.js');
@@ -76,9 +76,6 @@ self.addEventListener('activate', e => {
 });
 
 
-
-
-
 self.addEventListener('fetch', e => {
 
     let respuesta;
@@ -143,7 +140,7 @@ self.addEventListener('push', e => {
         vibrate: [125, 75, 125, 275, 200, 275, 125, 75, 125, 275, 200, 600, 200, 600],
         openUrl: '/',
         data: {
-            url: 'https://google.com',
+            url: '/',
             id: data.usuario
         },
         actions: [{
@@ -171,7 +168,25 @@ self.addEventListener('notificationclick', e => {
     const notificacion = e.notification;
     const accion = e.action;
 
-    console.log({ notificacion, accion });
 
-    notificacion.close();
+    const respuesta = clients.matchAll()
+        .then(clientes => {
+
+            //Busco una instancia (pestaña de Chrome) abierta y regreso la que esté activa
+
+            //Un cliente es un tab del navegador
+            let client = clientes.find(c => {
+                return c.visibilityState === 'visible';
+            });
+
+            if (client !== undefined) {
+                client.navigate(notificacion.data.url);
+                client.focus();
+            } else {
+                clients.openWindow(notificacion.data.url);
+            }
+            notificacion.close();
+        });
+
+    e.waitUntil(respuesta);
 });
