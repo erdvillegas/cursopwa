@@ -5,8 +5,8 @@ importScripts('js/sw-db.js');
 importScripts('js/sw-utils.js');
 
 
-const STATIC_CACHE    = 'static-v2';
-const DYNAMIC_CACHE   = 'dynamic-v1';
+const STATIC_CACHE = 'static-v3';
+const DYNAMIC_CACHE = 'dynamic-v1';
 const INMUTABLE_CACHE = 'inmutable-v1';
 
 
@@ -21,6 +21,7 @@ const APP_SHELL = [
     'img/avatars/thor.jpg',
     'img/avatars/wolverine.jpg',
     'js/app.js',
+    'js/camara-class.js',
     'js/sw-utils.js',
     'js/libs/plugins/mdtoast.min.js',
     'js/libs/plugins/mdtoast.min.css'
@@ -40,30 +41,30 @@ const APP_SHELL_INMUTABLE = [
 self.addEventListener('install', e => {
 
 
-    const cacheStatic = caches.open( STATIC_CACHE ).then(cache => 
-        cache.addAll( APP_SHELL ));
+    const cacheStatic = caches.open(STATIC_CACHE).then(cache =>
+        cache.addAll(APP_SHELL));
 
-    const cacheInmutable = caches.open( INMUTABLE_CACHE ).then(cache => 
-        cache.addAll( APP_SHELL_INMUTABLE ));
+    const cacheInmutable = caches.open(INMUTABLE_CACHE).then(cache =>
+        cache.addAll(APP_SHELL_INMUTABLE));
 
 
 
-    e.waitUntil( Promise.all([ cacheStatic, cacheInmutable ])  );
+    e.waitUntil(Promise.all([cacheStatic, cacheInmutable]));
 
 });
 
 
 self.addEventListener('activate', e => {
 
-    const respuesta = caches.keys().then( keys => {
+    const respuesta = caches.keys().then(keys => {
 
-        keys.forEach( key => {
+        keys.forEach(key => {
 
-            if (  key !== STATIC_CACHE && key.includes('static') ) {
+            if (key !== STATIC_CACHE && key.includes('static')) {
                 return caches.delete(key);
             }
 
-            if (  key !== DYNAMIC_CACHE && key.includes('dynamic') ) {
+            if (key !== DYNAMIC_CACHE && key.includes('dynamic')) {
                 return caches.delete(key);
             }
 
@@ -71,7 +72,7 @@ self.addEventListener('activate', e => {
 
     });
 
-    e.waitUntil( respuesta );
+    e.waitUntil(respuesta);
 
 });
 
@@ -79,39 +80,39 @@ self.addEventListener('activate', e => {
 
 
 
-self.addEventListener( 'fetch', e => {
+self.addEventListener('fetch', e => {
 
     let respuesta;
 
-    if ( e.request.url.includes('/api') ) {
+    if (e.request.url.includes('/api')) {
 
         // return respuesta????
-        respuesta = manejoApiMensajes( DYNAMIC_CACHE, e.request );
+        respuesta = manejoApiMensajes(DYNAMIC_CACHE, e.request);
 
     } else {
 
-        respuesta = caches.match( e.request ).then( res => {
+        respuesta = caches.match(e.request).then(res => {
 
-            if ( res ) {
-                
-                actualizaCacheStatico( STATIC_CACHE, e.request, APP_SHELL_INMUTABLE );
+            if (res) {
+
+                actualizaCacheStatico(STATIC_CACHE, e.request, APP_SHELL_INMUTABLE);
                 return res;
-                
+
             } else {
-    
-                return fetch( e.request ).then( newRes => {
-    
-                    return actualizaCacheDinamico( DYNAMIC_CACHE, e.request, newRes );
-    
+
+                return fetch(e.request).then(newRes => {
+
+                    return actualizaCacheDinamico(DYNAMIC_CACHE, e.request, newRes);
+
                 });
-    
+
             }
-    
+
         });
 
     }
 
-    e.respondWith( respuesta );
+    e.respondWith(respuesta);
 
 });
 
@@ -121,12 +122,12 @@ self.addEventListener('sync', e => {
 
     console.log('SW: Sync');
 
-    if ( e.tag === 'nuevo-post' ) {
+    if (e.tag === 'nuevo-post') {
 
         // postear a BD cuando hay conexión
         const respuesta = postearMensajes();
-        
-        e.waitUntil( respuesta );
+
+        e.waitUntil(respuesta);
     }
 
 });
@@ -136,7 +137,7 @@ self.addEventListener('push', e => {
 
     // console.log(e);
 
-    const data = JSON.parse( e.data.text() );
+    const data = JSON.parse(e.data.text());
 
     // console.log(data);
 
@@ -145,18 +146,17 @@ self.addEventListener('push', e => {
     const options = {
         body: data.cuerpo,
         // icon: 'img/icons/icon-72x72.png',
-        icon: `img/avatars/${ data.usuario }.jpg`,
+        icon: `img/avatars/${data.usuario}.jpg`,
         badge: 'img/favicon.ico',
         image: 'https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/5/5b/Torre_de_los_Avengers.png/revision/latest?cb=20150626220613&path-prefix=es',
-        vibrate: [125,75,125,275,200,275,125,75,125,275,200,600,200,600],
+        vibrate: [125, 75, 125, 275, 200, 275, 125, 75, 125, 275, 200, 600, 200, 600],
         openUrl: '/',
         data: {
             // url: 'https://google.com',
             url: '/',
             id: data.usuario
         },
-        actions: [
-            {
+        actions: [{
                 action: 'thor-action',
                 title: 'Thor',
                 icon: 'img/avatar/thor.jpg'
@@ -170,7 +170,7 @@ self.addEventListener('push', e => {
     };
 
 
-    e.waitUntil( self.registration.showNotification( title, options) );
+    e.waitUntil(self.registration.showNotification(title, options));
 
 
 });
@@ -192,27 +192,27 @@ self.addEventListener('notificationclick', e => {
     console.log({ notificacion, accion });
     // console.log(notificacion);
     // console.log(accion);
-    
+
 
     const respuesta = clients.matchAll()
-    .then( clientes => {
+        .then(clientes => {
 
-        let cliente = clientes.find( c => {
-            return c.visibilityState === 'visible';
+            let cliente = clientes.find(c => {
+                return c.visibilityState === 'visible';
+            });
+
+            if (cliente !== undefined) {
+                cliente.navigate(notificacion.data.url);
+                cliente.focus();
+            } else {
+                clients.openWindow(notificacion.data.url);
+            }
+
+            return notificacion.close();
+
         });
 
-        if ( cliente !== undefined ) {
-            cliente.navigate( notificacion.data.url );
-            cliente.focus();
-        } else {
-            clients.openWindow( notificacion.data.url );
-        }
-
-        return notificacion.close();
-
-    });
-
-    e.waitUntil( respuesta );
+    e.waitUntil(respuesta);
 
 
 });

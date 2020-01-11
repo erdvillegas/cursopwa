@@ -25,9 +25,6 @@ if (navigator.serviceWorker) {
 }
 
 
-
-
-
 // Referencias de jQuery
 var googleMapKey = 'AIzaSyA5mjCwx1TRLuBAjwQw84WE6h5ErSe7Uj8';
 
@@ -76,6 +73,9 @@ var foto = null;
 var usuario;
 
 
+//Init de la clase Camara
+const camara = new Camara($('#player')[0]);
+
 
 // ===== Codigo de la aplicación
 
@@ -85,6 +85,8 @@ function crearMensajeHTML(mensaje, personaje, lat, lng) {
 
     var content = `
     <li class="animated fadeIn fast"
+        data-user="${personaje}"
+        data-mensaje="${mensaje}"
         data-tipo="mensaje">
 
 
@@ -244,9 +246,10 @@ postBtn.on('click', function() {
         user: usuario,
         lat: lat,
         lng: lng,
-        // foto: foto
+        foto: foto
     };
 
+    console.log(data);
 
     fetch('api', {
             method: 'POST',
@@ -260,10 +263,11 @@ postBtn.on('click', function() {
         .catch(err => console.log('app.js error:', err));
 
     //camera.apagar();
-    contenedorCamara.addClass('oculto');
+    //contenedorCamara.addClass('oculto');
 
-    //crearMensajeHTML(mensaje, usuario, lat, lng, foto);
-    crearMensajeHTML(mensaje, usuario, lat, lng);
+    crearMensajeHTML(mensaje, usuario, lat, lng, foto);
+    foto = null;
+    //crearMensajeHTML(mensaje, usuario, lat, lng);
 
     foto = null;
 });
@@ -470,7 +474,6 @@ function mostrarMapaModal(lat, lng) {
                     </iframe>
             </div>
     `;
-
     modal.append(content);
 }
 
@@ -506,6 +509,8 @@ btnLocation.on('click', () => {
 btnPhoto.on('click', () => {
 
     console.log('Inicializar camara');
+    contenedorCamara.removeClass('oculto');
+    camara.encender();
 
 });
 
@@ -514,8 +519,45 @@ btnPhoto.on('click', () => {
 btnTomarFoto.on('click', () => {
 
     console.log('Botón tomar foto');
-
+    foto = camara.tomarFoto();
+    camara.apagar();
 });
 
 
 // Share API
+
+// if (navigator.share) {
+//     console.log("El navegador lo soporta");
+// } else {
+//     console.log("El navegador no lo soporta");
+// }
+
+timeline.on('click', 'li', function() {
+    console.log('Tipo: ' + $(this).data('tipo'));
+    console.log('Personaje: ' + $(this).data('user'));
+
+    //Pendiente Video 139 Minuto 8:51
+    let tipo = $(this).data('tipo');
+    let lat = $(this).data('lat');
+    let lng = $(this).data('lng');
+    let mensaje = $(this).data('mensaje');
+    let user = $(this).data('user');
+
+    console.log({ tipo, lat, lng, mensaje, user });
+
+    const shareOpts = {
+        title: user,
+        text: mensaje
+    };
+
+    if (tipo === 'mapa') {
+        shareOpts.text = 'Mapa';
+        shareOpts.url = `https://google.com/maps/@${lat},${lng},15z`;
+    }
+
+    if (navigator.share) {
+        navigator.share(shareOpts)
+            .then(() => console.log('Successful share'))
+            .catch((error) => console.log('Error sharing', error));
+    }
+});
